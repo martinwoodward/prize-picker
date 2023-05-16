@@ -32,6 +32,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: debug
+        run: echo {{ env.issue-id }}
       - name: Setup Pages
         uses: actions/configure-pages@v1
       - name: Set up node with nvm
