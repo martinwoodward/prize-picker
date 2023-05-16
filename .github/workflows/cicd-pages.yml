@@ -22,6 +22,9 @@ concurrency:
   group: "pages"
   cancel-in-progress: true
 
+env:
+  issue-id: 13
+
 jobs:
   # Build job
   build:
@@ -45,7 +48,7 @@ jobs:
             const fs = require('fs')
             
             await github.paginate(github.rest.issues.listComments,
-              { owner: 'gh-event-demos', repo: 'random-name-picker', issue_number: 13 },
+              { owner: 'gh-event-demos', repo: 'random-name-picker', issue_number: {{ env.issue-id }} },
               (response) => response.data.map((issuecomment) => issuecomment.user.login)
             )
             .then((commenters) => {
