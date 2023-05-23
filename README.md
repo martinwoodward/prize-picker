@@ -8,7 +8,7 @@
 
 :rocket: This site is deployed to GitHub Pages using GitHub Actions. The Actions workflow pulls entrants from commenters of a GitHub Issue.
 
-:ticket: To enter the draw (if there is one), add a comment to [This Issue](/GH-Event-Demos/random-name-picker/issues/1)
+:ticket: To enter the draw (if there is one), add a comment to [This Issue](https://gh.io/buildswag)
 
 ---
 
