@@ -8,7 +8,11 @@
 
 :rocket: This site is deployed to GitHub Pages using GitHub Actions. The Actions workflow pulls entrants from commenters of a GitHub Issue.
 
-:ticket: To enter the draw (if there is one), add a comment to [This Issue](https://gh.io/buildswag)
+🎫 if you want to enter the draw (if there is one currently running), please head to the issues tab and select issue. Leave a comment to enter. 
+
+---
+
+If you are a Hubber who wants to use this for prize draws, please see the instructions on the [GitHub IRL repo](https://github.com/github/IRL/blob/main/resources/raffles.md)
 
 ---
 
