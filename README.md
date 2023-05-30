@@ -10,11 +10,9 @@
 
 🎫 if you want to enter the draw (if there is one currently running), please head to the issues tab and select issue. Leave a comment to enter. 
 
----
+### Instructions for running a raffle
 
 If you are a Hubber who wants to use this for prize draws, please see the instructions on the [GitHub IRL repo](https://github.com/github/IRL/blob/main/resources/raffles.md)
-
----
 
 Below is the original README:
 
