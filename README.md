@@ -8,7 +8,7 @@
 
 :rocket: This site is deployed to GitHub Pages using GitHub Actions. The Actions workflow pulls entrants from commenters of a GitHub Issue.
 
-🎫 if you want to enter the draw (if there is one currently running), please head to the issues tab and select issue. Leave a comment to enter. 
+🎫 To enter the draw (if there is one currently running), please head to the issues tab, and select the issue for the raffle you want to enter. Leave a comment to enter. 
 
 ### Instructions for running a raffle
 
