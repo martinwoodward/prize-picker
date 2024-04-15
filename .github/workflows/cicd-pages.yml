@@ -1,5 +1,9 @@
 name: Deploy to Pages
 
+# Update the issue number below to correspond to the currently active draw
+env:
+  ISSUE_ID: 64
+
 on:
   # Runs on pushes targeting the default branch
   push:
@@ -21,9 +25,6 @@ permissions:
 concurrency:
   group: "pages"
   cancel-in-progress: true
-
-env:
-  ISSUE_ID: 61
 
 jobs:
   # Build job
