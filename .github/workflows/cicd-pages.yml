@@ -33,8 +33,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Set ISSUE_ID
+        if: github.event_name == 'push'
+        run: echo "ISSUE_ID=69" >> $GITHUB_ENV
       - name: Output Issue ID
-        run: echo ${{ github.event.inputs.ISSUE_ID }}
+        run: echo ${{ github.event.inputs.ISSUE_ID || env.ISSUE_ID }}
       - name: Setup Pages
         uses: actions/configure-pages@v1
       - name: Set up node with nvm
@@ -50,7 +53,7 @@ jobs:
           script: |
             const fs = require('fs')
             await github.paginate(github.rest.issues.listComments,
-              { owner: 'gh-event-demos', repo: 'random-name-picker', issue_number: ${{ github.event.inputs.ISSUE_ID }} },
+              { owner: 'gh-event-demos', repo: 'random-name-picker', issue_number: ${{ github.event.inputs.ISSUE_ID || env.ISSUE_ID }} },
               (response) => response.data.map((issuecomment) => issuecomment.user.login)
             )
             .then((commenters) => {
