@@ -12,7 +12,7 @@
 
 ### Instructions for running a raffle
 
-If you are a Hubber who wants to use this for prize draws, please see the instructions on the [GitHub IRL repo](https://github.com/github/IRL/blob/main/resources/how-to-run-a-raffle.md)
+If you are a Hubber who wants to use this for prize draws, please see the instructions on the [GitHub IRL repo](https://github.com/github/IRL/blob/main/event-guides/how-to-run-a-raffle.md)
 
 Below is the original README:
 
