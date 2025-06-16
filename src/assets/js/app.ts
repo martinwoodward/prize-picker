@@ -137,46 +137,26 @@ interface GitHubProfile {
   };
 
   /** Function to preload GitHub profile when winner is determined */
-  const onWinnerDetermined = (winner: string) => {
-    // Start fetching GitHub profile data early
-    fetchGitHubProfile(winner);
+  const onWinnerDetermined = async (
+    winner: string
+  ): Promise<{ avatarUrl: string; name: string | null; login: string } | null> => {
+    // Fetch GitHub profile data and wait for it to complete before continuing
+    const profile = await fetchGitHubProfile(winner);
+    return profile ? convertGitHubProfile(profile) : null;
   };
-
-  /** Update slot winner with GitHub profile information */
-  const updateSlotWithGitHubProfile = async (slotInstance: Slot, username: string) => {
-    // Check if we already have the profile data
-    const cachedProfile = githubProfileCache.get(username);
-
-    if (cachedProfile !== undefined) {
-      // We have cached data (either profile or null)
-      const profile = cachedProfile ? convertGitHubProfile(cachedProfile) : null;
-      slotInstance.updateWinnerWithProfile(profile);
-    } else {
-      // Fetch profile data
-      const fetchedProfile = await fetchGitHubProfile(username);
-      const profile = fetchedProfile ? convertGitHubProfile(fetchedProfile) : null;
-      slotInstance.updateWinnerWithProfile(profile);
-    }
-  };
-
-  // Declare slot variable that will be initialized later
-  let slot: Slot;
 
   /**  Functions to be trigger after spinning */
-  const onSpinEnd = async (winner: string) => {
+  const onSpinEnd = async () => {
     confettiAnimation();
     sunburstSvg.style.display = 'block';
     await soundEffects.win();
-
-    // Update the slot winner with GitHub profile data
-    await updateSlotWithGitHubProfile(slot, winner);
 
     drawButton.disabled = false;
     settingsButton.disabled = false;
   };
 
   /** Slot instance */
-  slot = new Slot({
+  const slot = new Slot({
     reelContainerSelector: '#reel',
     maxReelItems: MAX_REEL_ITEMS,
     onSpinStart,

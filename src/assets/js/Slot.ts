@@ -8,9 +8,11 @@ interface SlotConfigurations {
   /** User configuration for callback function that runs before spinning reel */
   onSpinStart?: () => void;
   /** User configuration for callback function that runs after spinning reel */
-  onSpinEnd?: (winner: string) => void;
+  onSpinEnd?: () => void;
   /** User configuration for callback function that runs when winner is determined */
-  onWinnerDetermined?: (winner: string) => void;
+  onWinnerDetermined?: (
+    winner: string
+  ) => Promise<{ avatarUrl: string; name: string | null; login: string } | null>;
 
   /** User configuration for callback function that runs after user updates the name list */
   onNameListChanged?: () => void;
@@ -197,14 +199,17 @@ export default class Slot {
 
     reelContainer.appendChild(fragment);
 
+    // eslint-disable-next-line no-console
     console.log('Displayed items: ', randomNames);
+    // eslint-disable-next-line no-console
     console.log('Winner: ', randomNames[randomNames.length - 1]);
 
     const winner = randomNames[randomNames.length - 1];
 
-    // Call winner determined callback early for preloading
+    // Get winner profile data before proceeding
+    let winnerProfile: { avatarUrl: string; name: string | null; login: string } | null = null;
     if (this.onWinnerDetermined) {
-      this.onWinnerDetermined(winner);
+      winnerProfile = await this.onWinnerDetermined(winner);
     }
 
     // Remove winner form name list if necessary
@@ -214,6 +219,7 @@ export default class Slot {
       ), 1);
     }
 
+    // eslint-disable-next-line no-console
     console.log('Remaining: ', this.nameList);
 
     // Play the spin animation
@@ -233,17 +239,17 @@ export default class Slot {
       .slice(0, reelContainer.children.length - 1)
       .forEach((element) => element.remove());
 
-    // Replace the last element with a proper winner element
+    // Replace the last element with a proper winner element that includes profile data
     const lastElement = reelContainer.children[reelContainer.children.length - 1];
     if (lastElement) {
-      const winnerElement = Slot.createWinnerElement(winner);
+      const winnerElement = Slot.createWinnerElement(winner, winnerProfile);
       reelContainer.replaceChild(winnerElement, lastElement);
     }
 
     this.havePreviousWinner = true;
 
     if (this.onSpinEnd) {
-      this.onSpinEnd(winner);
+      this.onSpinEnd();
     }
     return true;
   }
@@ -256,7 +262,7 @@ export default class Slot {
    */
   public static createWinnerElement(
     winner: string,
-    profile?: { avatarUrl: string; name: string | null; login: string }
+    profile?: { avatarUrl: string; name: string | null; login: string } | null
   ): HTMLElement {
     const winnerElement = document.createElement('div');
     winnerElement.classList.add('reel-item', 'reel-item--winner');
@@ -272,8 +278,18 @@ export default class Slot {
           </div>
         </div>
       `;
+    } else if (profile === null) {
+      // Profile fetch failed or not found
+      winnerElement.innerHTML = `
+        <div class="winner-profile winner-profile--error">
+          <div class="winner-profile__info">
+            <div class="winner-profile__name">Profile not found</div>
+            <div class="winner-profile__username">@${winner}</div>
+          </div>
+        </div>
+      `;
     } else {
-      // Show loading state or username only
+      // Show loading state (this case should rarely happen now)
       winnerElement.innerHTML = `
         <div class="winner-profile">
           <div class="winner-profile__loading">
