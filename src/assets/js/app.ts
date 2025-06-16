@@ -139,7 +139,10 @@ import SoundEffects from '@js/SoundEffects';
   });
 
   // Hide fullscreen button when it is not supported
-  if (!(document.documentElement.requestFullscreen && document.exitFullscreen)) {
+  if (
+    typeof document.documentElement.requestFullscreen !== 'function'
+    || typeof document.exitFullscreen !== 'function'
+  ) {
     fullscreenButton.remove();
   }
 
@@ -170,4 +173,30 @@ import SoundEffects from '@js/SoundEffects';
 
   // Click handler for "Discard and close" button for setting page
   settingsCloseButton.addEventListener('click', onSettingsClose);
+
+  // Keyboard handler for any key press to trigger draw
+  document.addEventListener('keydown', (event) => {
+    // Prevent triggering if settings are open or if typing in a text area/input
+    if (settingsWrapper.style.display === 'block'
+      || event.target instanceof HTMLTextAreaElement
+      || event.target instanceof HTMLInputElement) {
+      return;
+    }
+
+    // Prevent triggering if draw button is disabled (during spin)
+    if (drawButton.disabled) {
+      return;
+    }
+
+    // Prevent default behavior for certain keys that might have special meaning
+    event.preventDefault();
+
+    // Trigger the same functionality as clicking the draw button
+    if (!slot.names.length) {
+      onSettingsOpen();
+      return;
+    }
+
+    slot.spin();
+  });
 })();
