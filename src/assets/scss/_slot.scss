@@ -221,3 +221,119 @@
   z-index: $z-index-confetti;
   pointer-events: none;
 }
+
+// Winner profile styles
+.reel-item--winner {
+  background: transparent;
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 1rem 0;
+  color: black;
+  font-size: 3rem !important;
+  line-height: 1.2 !important;
+  height: auto !important;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  white-space: normal;
+  overflow: visible;
+}
+
+.winner-profile {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+
+  &__avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #333;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: 3rem;
+    font-weight: bold;
+    color: black;
+    margin: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  &__username {
+    font-size: 3.75rem;
+    color: black;
+    margin: 0;
+  }
+
+  &__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+
+    .winner-profile__name {
+      font-size: 3rem;
+      text-align: center;
+      color: black;
+    }
+  }
+
+  &--error {
+    .winner-profile__name {
+      color: #cc0000;
+      font-size: 2rem;
+    }
+
+    .winner-profile__username {
+      color: #666;
+    }
+  }
+}
+
+// Scale winner profile for different screen sizes
+@each $media-query, $factor in $scale-factors {
+  @media #{$media-query} {
+    .reel-item--winner {
+      font-size: max((1rem * $factor), 0.8rem);
+      padding: 2rem * $factor;
+      margin: 1rem * $factor 0;
+      border-radius: 12px * $factor;
+    }
+
+    .winner-profile {
+      gap: 2rem * $factor;
+
+      &__avatar {
+        width: 120px * $factor;
+        height: 120px * $factor;
+        border-width: 3px * $factor;
+      }
+
+      &__name {
+        font-size: max((3rem * $factor), 1.5rem);
+      }
+
+      &__username {
+        font-size: max((3.75rem * $factor), 1.5rem);
+      }
+
+      &__loading .winner-profile__name {
+        font-size: max((3rem * $factor), 1.5rem);
+      }
+    }
+  }
+}

@@ -1,0 +1,93 @@
+.github-profile {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+
+  &__content {
+    background: rgba(0, 0, 0, 0.95);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    border: 2px solid var(--color-primary);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid var(--color-primary);
+    object-fit: cover;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__name {
+    color: var(--color-primary);
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  &__username {
+    color: var(--color-text-secondary);
+    font-size: 1.2rem;
+    margin: 0;
+
+    &::before {
+      content: '@';
+    }
+  }
+
+  &__error {
+    color: var(--color-danger);
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  &__close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--color-text);
+      transform: scale(1.1);
+    }
+  }
+}

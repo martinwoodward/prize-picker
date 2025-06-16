@@ -8,7 +8,9 @@ interface SlotConfigurations {
   /** User configuration for callback function that runs before spinning reel */
   onSpinStart?: () => void;
   /** User configuration for callback function that runs after spinning reel */
-  onSpinEnd?: () => void;
+  onSpinEnd?: (winner: string) => void;
+  /** User configuration for callback function that runs when winner is determined */
+  onWinnerDetermined?: (winner: string) => void;
 
   /** User configuration for callback function that runs after user updates the name list */
   onNameListChanged?: () => void;
@@ -40,6 +42,9 @@ export default class Slot {
   /** Callback function that runs after spinning reel */
   private onSpinEnd?: NonNullable<SlotConfigurations['onSpinEnd']>;
 
+  /** Callback function that runs when winner is determined */
+  private onWinnerDetermined?: NonNullable<SlotConfigurations['onWinnerDetermined']>;
+
   /** Callback function that runs after spinning reel */
   private onNameListChanged?: NonNullable<SlotConfigurations['onNameListChanged']>;
 
@@ -58,6 +63,7 @@ export default class Slot {
       reelContainerSelector,
       onSpinStart,
       onSpinEnd,
+      onWinnerDetermined,
       onNameListChanged
     }: SlotConfigurations
   ) {
@@ -68,6 +74,7 @@ export default class Slot {
     this.shouldRemoveWinner = removeWinner;
     this.onSpinStart = onSpinStart;
     this.onSpinEnd = onSpinEnd;
+    this.onWinnerDetermined = onWinnerDetermined;
     this.onNameListChanged = onNameListChanged;
 
     // Create reel animation
@@ -183,7 +190,8 @@ export default class Slot {
 
     randomNames.forEach((name) => {
       const newReelItem = document.createElement('div');
-      newReelItem.innerHTML = name;
+      newReelItem.innerHTML = `@${name}`;
+      newReelItem.classList.add('reel-item');
       fragment.appendChild(newReelItem);
     });
 
@@ -192,10 +200,17 @@ export default class Slot {
     console.log('Displayed items: ', randomNames);
     console.log('Winner: ', randomNames[randomNames.length - 1]);
 
+    const winner = randomNames[randomNames.length - 1];
+
+    // Call winner determined callback early for preloading
+    if (this.onWinnerDetermined) {
+      this.onWinnerDetermined(winner);
+    }
+
     // Remove winner form name list if necessary
     if (shouldRemoveWinner) {
       this.nameList.splice(this.nameList.findIndex(
-        (name) => name === randomNames[randomNames.length - 1]
+        (name) => name === winner
       ), 1);
     }
 
@@ -218,11 +233,92 @@ export default class Slot {
       .slice(0, reelContainer.children.length - 1)
       .forEach((element) => element.remove());
 
+    // Replace the last element with a proper winner element
+    const lastElement = reelContainer.children[reelContainer.children.length - 1];
+    if (lastElement) {
+      const winnerElement = Slot.createWinnerElement(winner);
+      reelContainer.replaceChild(winnerElement, lastElement);
+    }
+
     this.havePreviousWinner = true;
 
     if (this.onSpinEnd) {
-      this.onSpinEnd();
+      this.onSpinEnd(winner);
     }
     return true;
+  }
+
+  /**
+   * Create a winner display element with GitHub profile layout
+   * @param winner The winner's GitHub username
+   * @param profile The GitHub profile data (optional, for immediate display)
+   * @returns HTMLElement representing the winner
+   */
+  public static createWinnerElement(
+    winner: string,
+    profile?: { avatarUrl: string; name: string | null; login: string }
+  ): HTMLElement {
+    const winnerElement = document.createElement('div');
+    winnerElement.classList.add('reel-item', 'reel-item--winner');
+
+    if (profile) {
+      // Show GitHub profile data
+      winnerElement.innerHTML = `
+        <div class="winner-profile">
+          <img class="winner-profile__avatar" src="${profile.avatarUrl}" alt="${profile.login}'s avatar" />
+          <div class="winner-profile__info">
+            <div class="winner-profile__name">${profile.name || profile.login}</div>
+            <div class="winner-profile__username">@${profile.login}</div>
+          </div>
+        </div>
+      `;
+    } else {
+      // Show loading state or username only
+      winnerElement.innerHTML = `
+        <div class="winner-profile">
+          <div class="winner-profile__loading">
+            <div class="winner-profile__name">@${winner}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    return winnerElement;
+  }
+
+  /**
+   * Update the winner element with GitHub profile data
+   * @param profile The GitHub profile data
+   */
+  public updateWinnerWithProfile(
+    profile: { avatarUrl: string; name: string | null; login: string } | null
+  ): void {
+    if (!this.reelContainer) return;
+
+    const winnerElement = this.reelContainer.querySelector('.reel-item--winner');
+    if (!winnerElement) return;
+
+    if (profile) {
+      winnerElement.innerHTML = `
+        <div class="winner-profile">
+          <img class="winner-profile__avatar" src="${profile.avatarUrl}" alt="${profile.login}'s avatar" />
+          <div class="winner-profile__info">
+            <div class="winner-profile__name">${profile.name || profile.login}</div>
+            <div class="winner-profile__username">@${profile.login}</div>
+          </div>
+        </div>
+      `;
+    } else {
+      // Profile not found
+      const currentWinner = winnerElement.querySelector('.winner-profile__name')?.textContent?.replace('@', '') || '';
+      winnerElement.innerHTML = `
+        <div class="winner-profile winner-profile--error">
+          <div class="winner-profile__info">
+            <div class="winner-profile__name">Profile not found</div>
+            <div class="winner-profile__username">@${currentWinner}</div>
+          </div>
+        </div>
+      `;
+    }
   }
 }

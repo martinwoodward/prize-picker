@@ -3,6 +3,24 @@ import confetti from 'canvas-confetti';
 import Slot from '@js/Slot';
 import SoundEffects from '@js/SoundEffects';
 
+// GitHub API interface
+interface GitHubUser {
+  login: string;
+  name: string | null;
+  avatar_url: string; // eslint-disable-line camelcase
+  bio: string | null;
+  public_repos: number; // eslint-disable-line camelcase
+  followers: number;
+  following: number;
+}
+
+// Converted GitHub profile interface
+interface GitHubProfile {
+  avatarUrl: string;
+  name: string | null;
+  login: string;
+}
+
 // Initialize slot machine
 (() => {
   const drawButton = document.getElementById('draw-button') as HTMLButtonElement | null;
@@ -47,13 +65,13 @@ import SoundEffects from '@js/SoundEffects';
   const CONFETTI_COLORS = ['#26ccff', '#a25afd', '#ff5e7e', '#88ff5a', '#fcff42', '#ffa62d', '#ff36ff'];
   let confettiAnimationId;
 
-  /** Confeetti animation instance */
+  /** Confetti animation instance */
   const customConfetti = confetti.create(confettiCanvas, {
     resize: true,
     useWorker: true
   });
 
-  /** Triggers cconfeetti animation until animation is canceled */
+  /** Triggers confetti animation until animation is canceled */
   const confettiAnimation = () => {
     const windowWidth = window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth;
     const confettiScale = Math.max(0.5, Math.min(1, windowWidth / 1100));
@@ -69,6 +87,38 @@ import SoundEffects from '@js/SoundEffects';
 
     confettiAnimationId = window.requestAnimationFrame(confettiAnimation);
   };
+
+  // Cache for GitHub profiles to avoid repeated API calls
+  const githubProfileCache = new Map<string, GitHubUser | null>();
+
+  /** Fetch GitHub user profile */
+  const fetchGitHubProfile = async (username: string): Promise<GitHubUser | null> => {
+    // Check cache first
+    if (githubProfileCache.has(username)) {
+      return githubProfileCache.get(username) || null;
+    }
+
+    try {
+      const response = await fetch(`https://api.github.com/users/${username}`);
+      if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.status}`);
+      }
+      const profile = await response.json() as GitHubUser;
+      githubProfileCache.set(username, profile);
+      return profile;
+    } catch (error) {
+      console.error('Failed to fetch GitHub profile:', error);
+      githubProfileCache.set(username, null);
+      return null;
+    }
+  };
+
+  /** Convert GitHub API response to our profile interface */
+  const convertGitHubProfile = (profile: GitHubUser): GitHubProfile => ({
+    avatarUrl: profile.avatar_url,
+    name: profile.name,
+    login: profile.login
+  });
 
   /** Function to stop the winning animation */
   const stopWinningAnimation = () => {
@@ -86,21 +136,52 @@ import SoundEffects from '@js/SoundEffects';
     soundEffects.spin((MAX_REEL_ITEMS - 1) / 10);
   };
 
+  /** Function to preload GitHub profile when winner is determined */
+  const onWinnerDetermined = (winner: string) => {
+    // Start fetching GitHub profile data early
+    fetchGitHubProfile(winner);
+  };
+
+  /** Update slot winner with GitHub profile information */
+  const updateSlotWithGitHubProfile = async (slotInstance: Slot, username: string) => {
+    // Check if we already have the profile data
+    const cachedProfile = githubProfileCache.get(username);
+
+    if (cachedProfile !== undefined) {
+      // We have cached data (either profile or null)
+      const profile = cachedProfile ? convertGitHubProfile(cachedProfile) : null;
+      slotInstance.updateWinnerWithProfile(profile);
+    } else {
+      // Fetch profile data
+      const fetchedProfile = await fetchGitHubProfile(username);
+      const profile = fetchedProfile ? convertGitHubProfile(fetchedProfile) : null;
+      slotInstance.updateWinnerWithProfile(profile);
+    }
+  };
+
+  // Declare slot variable that will be initialized later
+  let slot: Slot;
+
   /**  Functions to be trigger after spinning */
-  const onSpinEnd = async () => {
+  const onSpinEnd = async (winner: string) => {
     confettiAnimation();
     sunburstSvg.style.display = 'block';
     await soundEffects.win();
+
+    // Update the slot winner with GitHub profile data
+    await updateSlotWithGitHubProfile(slot, winner);
+
     drawButton.disabled = false;
     settingsButton.disabled = false;
   };
 
   /** Slot instance */
-  const slot = new Slot({
+  slot = new Slot({
     reelContainerSelector: '#reel',
     maxReelItems: MAX_REEL_ITEMS,
     onSpinStart,
     onSpinEnd,
+    onWinnerDetermined,
     onNameListChanged: stopWinningAnimation
   });
 
@@ -109,7 +190,10 @@ import SoundEffects from '@js/SoundEffects';
     const names = await res.text();
     const arr = names.split('\n');
     for (let i = 0; i < arr.length; i++) {
-      slot.names.push(arr[i]);
+      const name = arr[i].trim();
+      if (name) {
+        slot.names.push(name);
+      }
     }
   };
   getNames();
