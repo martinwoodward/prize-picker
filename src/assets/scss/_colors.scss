@@ -36,17 +36,17 @@ $color-link-hover: rgba($color-white, 0.9);
 
 // button
 $color-button-text: $color-white;
-$color-button-default-background: $color-yellow;
-$color-button-default-hover-background: lighten($color-yellow, 5%);
+$color-button-default-background: $color-purple-step1;
+$color-button-default-hover-background: lighten($color-purple-step1, 5%);
 $color-button-danger-background: $color-blod-orange;
 $color-button-danger-hover-background: lighten($color-blod-orange, 5%);
 
 // title
 $color-title: $color-white;
-$color-title-border: $color-yellow;
+$color-title-border: $color-purple-step1;
 
 // slot
-$color-slot-background: $color-yellow;
+$color-slot-background: $color-purple-step1;
 $color-slot-shadow: $color-shadow;
 $color-slot-inner-background: $color-white;
 $color-slot-text: $color-black;
