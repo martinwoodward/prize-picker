@@ -43,27 +43,6 @@ jobs:
         run: yarn install
       - name: Yarn build
         run: yarn build
-        
-      - name: Pre-populate the list of names from an Issue
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs')
-            await github.paginate(github.rest.issues.listComments,
-              { owner: 'gh-event-demos', repo: 'random-name-picker', issue_number: ${{ env.ISSUE_ID }} },
-              (response) => response.data.map((issuecomment) => issuecomment.user.login)
-            )
-            .then((commenters) => {
-              const unique = Array.from(new Set(commenters)) 
-              const content = unique.join('\n')
-              fs.writeFile('dist/names.txt', content, err => {
-                if (err) {
-                  console.error(err);
-                }
-                // file written successfully
-                console.log(unique.length + ' entries added, (' + (commenters.length - unique.length) + ' duplicates removed)')
-              });
-            }); 
             
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
