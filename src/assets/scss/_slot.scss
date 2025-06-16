@@ -226,17 +226,19 @@
 .reel-item--winner {
   background: transparent;
   border-radius: 12px;
-  padding: 2rem;
-  margin: 1rem 0;
+  padding: 0 2rem;
+  margin: (-$slot-inner-padding) 0;
   color: black;
   font-size: 3rem !important;
   line-height: 1.2 !important;
-  height: auto !important;
+  height: calc(100% + #{2 * $slot-inner-padding}) !important;
   display: flex;
   align-items: center;
+  justify-content: center;
   text-align: left;
   white-space: normal;
   overflow: visible;
+  box-sizing: border-box;
 }
 
 .winner-profile {
@@ -310,7 +312,6 @@
     .reel-item--winner {
       font-size: max((1rem * $factor), 0.8rem);
       padding: 2rem * $factor;
-      margin: 1rem * $factor 0;
       border-radius: 12px * $factor;
     }
 
