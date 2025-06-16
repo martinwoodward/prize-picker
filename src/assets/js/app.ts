@@ -91,26 +91,77 @@ interface GitHubProfile {
   // Cache for GitHub profiles to avoid repeated API calls
   const githubProfileCache = new Map<string, GitHubUser | null>();
 
+  // Configuration for GitHub API fetching
+  const GITHUB_API_CONFIG = {
+    ENABLED: true, // Set to false to disable GitHub API calls entirely
+    MAX_RETRIES: 2,
+    RETRY_DELAY: 1000 // milliseconds
+  };
+
+  /** Sleep function for retry delays */
+  const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
   /** Fetch GitHub user profile */
   const fetchGitHubProfile = async (username: string): Promise<GitHubUser | null> => {
+    // Check if GitHub API is disabled
+    if (!GITHUB_API_CONFIG.ENABLED) {
+      return null;
+    }
+
     // Check cache first
     if (githubProfileCache.has(username)) {
       return githubProfileCache.get(username) || null;
     }
 
-    try {
-      const response = await fetch(`https://api.github.com/users/${username}`);
-      if (!response.ok) {
-        throw new Error(`GitHub API error: ${response.status}`);
+    let lastError: Error | null = null;
+    for (let attempt = 1; attempt <= GITHUB_API_CONFIG.MAX_RETRIES + 1; attempt++) {
+      try {
+        // eslint-disable-next-line no-console
+        console.log(`Fetching GitHub profile for: ${username} (attempt ${attempt})`);
+        // eslint-disable-next-line no-await-in-loop
+        const response = await fetch(`https://api.github.com/users/${username}`);
+        if (!response.ok) {
+          // eslint-disable-next-line no-await-in-loop
+          const errorText = await response.text();
+          const errorMessage = `GitHub API error: ${response.status} ${response.statusText}`;
+          console.error(errorMessage, errorText);
+          // Check if it's a rate limit error
+          if (response.status === 403) {
+            const rateLimitRemaining = response.headers.get('X-RateLimit-Remaining');
+            const rateLimitReset = response.headers.get('X-RateLimit-Reset');
+            console.error(`Rate limit exceeded. Remaining: ${rateLimitRemaining}, Reset: ${rateLimitReset}`);
+            // Don't retry on rate limit errors
+            break;
+          }
+          // Don't retry on 404 (user not found)
+          if (response.status === 404) {
+            console.error(`User ${username} not found on GitHub`);
+            break;
+          }
+          throw new Error(errorMessage);
+        }
+        // eslint-disable-next-line no-await-in-loop
+        const profile = await response.json() as GitHubUser;
+        // eslint-disable-next-line no-console
+        console.log(`Successfully fetched profile for ${username}`);
+        githubProfileCache.set(username, profile);
+        return profile;
+      } catch (error) {
+        lastError = error as Error;
+        console.error(`Attempt ${attempt} failed to fetch GitHub profile for ${username}:`, error);
+        // Wait before retrying (exponential backoff)
+        if (attempt <= GITHUB_API_CONFIG.MAX_RETRIES) {
+          const delay = GITHUB_API_CONFIG.RETRY_DELAY * (2 ** (attempt - 1));
+          // eslint-disable-next-line no-console
+          console.log(`Retrying in ${delay}ms...`);
+          // eslint-disable-next-line no-await-in-loop
+          await sleep(delay);
+        }
       }
-      const profile = await response.json() as GitHubUser;
-      githubProfileCache.set(username, profile);
-      return profile;
-    } catch (error) {
-      console.error('Failed to fetch GitHub profile:', error);
-      githubProfileCache.set(username, null);
-      return null;
     }
+    console.error(`All attempts failed for ${username}:`, lastError);
+    githubProfileCache.set(username, null);
+    return null;
   };
 
   /** Convert GitHub API response to our profile interface */

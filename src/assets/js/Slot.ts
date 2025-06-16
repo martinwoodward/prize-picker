@@ -279,15 +279,8 @@ export default class Slot {
         </div>
       `;
     } else if (profile === null) {
-      // Profile fetch failed or not found
-      winnerElement.innerHTML = `
-        <div class="winner-profile winner-profile--error">
-          <div class="winner-profile__info">
-            <div class="winner-profile__name">Profile not found</div>
-            <div class="winner-profile__username">@${winner}</div>
-          </div>
-        </div>
-      `;
+      // Profile fetch failed or not found - show just the username without profile data
+      winnerElement.innerHTML = `@${winner}`;
     } else {
       // Show loading state (this case should rarely happen now)
       winnerElement.innerHTML = `
@@ -325,16 +318,9 @@ export default class Slot {
         </div>
       `;
     } else {
-      // Profile not found
+      // Profile not found - show just the username without profile data
       const currentWinner = winnerElement.querySelector('.winner-profile__name')?.textContent?.replace('@', '') || '';
-      winnerElement.innerHTML = `
-        <div class="winner-profile winner-profile--error">
-          <div class="winner-profile__info">
-            <div class="winner-profile__name">Profile not found</div>
-            <div class="winner-profile__username">@${currentWinner}</div>
-          </div>
-        </div>
-      `;
+      winnerElement.innerHTML = `@${currentWinner}`;
     }
   }
 }
