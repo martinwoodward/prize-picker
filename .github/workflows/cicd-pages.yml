@@ -41,6 +41,21 @@ jobs:
         uses: dcodeIO/setup-node-nvm@v4
       - name: Yarn install
         run: yarn install
+      - name: Set deployment environment variables
+        run: |
+          # Determine if this is a user/org pages repo (username.github.io) or project repo
+          if [[ "${{ github.event.repository.name }}" == "${{ github.repository_owner }}.github.io" ]]; then
+            echo "APP_DOMAIN=${{ github.repository_owner }}.github.io" >> .env.production
+            echo "APP_CONTEXT=/" >> .env.production
+          else
+            echo "APP_DOMAIN=${{ github.repository_owner }}.github.io" >> .env.production
+            echo "APP_CONTEXT=/${{ github.event.repository.name }}/" >> .env.production
+          fi
+          echo "APP_META_TITLE=Lucky Draw Picker" >> .env.production
+          echo "APP_META_DESCRIPTION=Simple HTML5 lucky draw picker using Web Animations and AudioContext API." >> .env.production
+          echo "APP_META_KEYWORDS=lucky draw, lucky draw online, lucky draw app, random name picker, name picker" >> .env.production
+          echo "APP_VERSION=${{ github.ref_name }}" >> .env.production
+          echo "APP_BUILD_TIMESTAMP=$(date +%s)000" >> .env.production
       - name: Yarn build
         run: yarn build
             
