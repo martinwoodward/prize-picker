@@ -4,10 +4,11 @@
   "description": "Simple HTML5 random name picker for picking lucky draw winner using Web Animations and AudioContext API.",
   "private": true,
   "scripts": {
+    "prebuild": "node scripts/updateBuildTimestamp.js",
     "build": "webpack --config webpack/webpack.prod.conf.js",
     "start": "webpack serve --open --config webpack/webpack.dev.conf.js",
-    "first-release": "npx standard-version --commit-all --tag-prefix v --release-as 1.0.0 --infile CHANGELOG.md",
-    "release": "npx standard-version --commit-all --tag-prefix v --infile CHANGELOG.md",
+    "first-release": "yarn standard-version --commit-all --tag-prefix v --release-as 1.0.0 --infile CHANGELOG.md",
+    "release": "yarn standard-version --commit-all --tag-prefix v --infile CHANGELOG.md",
     "prepare": "husky install",
     "extract-latest-change-log": "node scripts/extractLatestChangeLog.js"
   },

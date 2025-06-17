@@ -44,7 +44,31 @@ module.exports = merge(baseWebpackConfig, {
     }),
     new WorkboxPlugin.GenerateSW({
       clientsClaim: false,
-      skipWaiting: false
+      skipWaiting: false,
+      // Cache busting strategy
+      cacheId: `prize-picker-${process.env.APP_VERSION || 'v1'}-${process.env.APP_BUILD_TIMESTAMP || Date.now()}`,
+      // Define what to cache and what not to cache
+      exclude: [
+        /\.map$/,
+        /manifest$/,
+        /bundle-analyzer-plugin-report\.html$/
+      ],
+      // Runtime caching for dynamic content
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/api\.github\.com/,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'github-api-cache',
+            expiration: {
+              maxEntries: 100,
+              maxAgeSeconds: 60 * 60 * 24 // 24 hours
+            }
+          }
+        }
+      ],
+      // Clean up old caches
+      cleanupOutdatedCaches: true
     }),
     new BundleAnalyzerPlugin({
       analyzerMode: 'static',

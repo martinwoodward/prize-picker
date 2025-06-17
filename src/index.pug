@@ -8,6 +8,13 @@ html(xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en")
     meta(name="viewport" content="width=device-width, initial-scale=1, user-scalable=no")
     meta(name="format-detection" content="telephone=no, date=no, address=no, email=no")
     meta(name="msapplication-tap-highlight" content="no")
+    
+    //- Cache busting
+    meta(name="app-version" content=APP_VERSION)
+    meta(name="build-timestamp" content=APP_BUILD_TIMESTAMP)
+    meta(http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate")
+    meta(http-equiv="Pragma" content="no-cache")
+    meta(http-equiv="Expires" content="0")
 
     //- SEO
     include ./partials/seo.pug

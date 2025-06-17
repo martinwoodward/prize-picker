@@ -47,7 +47,7 @@ Demo is available at [https://pinkylam.me/playground/random-name-picker](https:/
 
 ### Prerequisite
 * Node 12 or nvm installed
-* Yarn or NPM installed
+* Yarn installed
 
 ### Install dependencies
 To install dependencies:
@@ -67,3 +67,19 @@ To build the project for production:
 yarn build
 ```
 All the build files can be found in `/dist` folder.
+
+## Cache Busting
+
+This project implements automatic cache busting to ensure users receive updates immediately after deployment:
+
+### How It Works
+- **Automatic timestamps**: Build timestamp updates before each `yarn build`
+- **Content hashing**: JS/CSS files get unique hashes (`[name].[chunkhash:8].js`)
+- **Service worker**: Unique cache IDs per build with automatic cleanup
+- **HTML meta tags**: Prevent HTML caching with cache-control headers
+
+### Environment Variables
+- `APP_VERSION`: Semantic version for cache identification  
+- `APP_BUILD_TIMESTAMP`: Unix timestamp updated automatically on each build
+
+When you run `yarn build`, the system automatically ensures browsers load the latest version while maintaining optimal performance for unchanged assets.
